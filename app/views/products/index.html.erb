@@ -1,1 +1,43 @@
+<% @products.each do |product| %>
+  <%= render partial: "product", locals: {product: product} %>
+<% end %>
 
+<script type="text/javascript" charset="utf-8">
+$(function () {
+  $(".js-more").on('click', function() {
+    // get the id from the data attribute
+    var id = $(this).data("id")
+    let promises = getProductInfo(id)
+
+    let $description = $(`#description-${id}`)
+
+    promises.description.then((description) => {
+      promises.availability.then((availability) => {
+        $description.text(description)
+        if( availability === 'true' ) {
+          $description.before('Available')
+        } else {
+          $description.before('Sold Out')
+        }
+      })
+    })
+
+  })
+})
+
+function getProductInfo(id) {
+  let descriptionPromise = fetch( `/products/${id}/description` ).then((response) => {
+    return response.text()
+  })
+  let availabilityPromise = fetch( `/products/${id}/inventory` ).then((response) => {
+    return response.text()
+  })
+
+  let infoPromises = {
+    description: descriptionPromise,
+    availability: availabilityPromise
+  }
+
+  return infoPromises
+}
+</script>
